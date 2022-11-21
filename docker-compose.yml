@@ -1,80 +1,155 @@
-#https://github.com/Luctia/ezarr <-- need to check this out
-version: "2.1"
+---
+version: "3.1"
 services:
-  radarr:
-    image: lscr.io/linuxserver/radarr:latest
-    container_name: radarr
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/London
-    volumes:
-      - ./Radarr/data:/config
-      - ./Radarr/movies:/movies #optional
-      - ./Radarr/downloads:/downloads #optional
-    ports:
-      - 7878:7878
-    restart: unless-stopped
-  sonarr:
-    image: lscr.io/linuxserver/sonarr:latest
-    container_name: sonarr
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/London
-    volumes:
-      - ./Sonarr/data:/config
-      - ./Sonarr/tvseries:/tv #optional
-      - ./Sonarr/downloads:/downloads #optional
-    ports:
-      - 8989:8989
-    restart: unless-stopped
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
-    container_name: qbittorrent
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/London
-      - WEBUI_PORT=8080
-    volumes:
-      - ./qbittorrent/config:/config
-      - ./qbittorrent/downloads:/downloads
-    ports:
-      - 8080:8080
-      - 6881:6881
-      - 6881:6881/udp
-    restart: unless-stopped
-  reverse-proxy:
-    image: 'jc21/nginx-proxy-manager:latest'
-    restart: unless-stopped
-    ports:
-      - '80:80' # Public HTTP Port
-      - '443:443' # Public HTTPS Port
-      - '81:81' # Admin Web Port
-      # Add any other Stream port you want to expose
-      # - '21:21' # FTP
-    # Uncomment the next line if you uncomment anything in the section
-    # environment:
-      # Uncomment this if you want to change the location of 
-      # the SQLite DB file within the container
-      # DB_SQLITE_FILE: "/data/database.sqlite"
-      # Uncomment this if IPv6 is not enabled on your host
-      # DISABLE_IPV6: 'true'
-    volumes:
-      - ./nginx/data:/data
-      - ./nginx/letsencrypt:/etc/letsencrypt
   plex:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
     network_mode: host
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${UID}
+      - PGID=13000
       - VERSION=docker
-      - PLEX_CLAIM= #optional
+      - PLEX_CLAIM=${PLEX_CLAIM}
     volumes:
-      - ./plex/library:/config
-      - ./plex/tvseries:/tv
-      - ./plex/movies:/movies
+      - ${ROOT_DIR}/docker/plex-config:/config
+      - ${ROOT_DIR}/data/media:/data/media
+    restart: unless-stopped
+
+#  tautulli:
+#    image: lscr.io/linuxserver/tautulli:latest
+#    container_name: tautulli
+#    depends_on:
+#      - plex
+#    environment:
+#      - PUID=${UID}
+#      - PGID=13000
+#      - TZ=${TIMEZONE}
+#    volumes:
+#      - ${ROOT_DIR}/docker/tautulli-config:/config
+#    ports:
+#      - 8181:8181
+#    restart: unless-stopped
+
+#  jellyfin:
+#    image: lscr.io/linuxserver/jellyfin:latest
+#    container_name: jellyfin
+#    environment:
+#      - PUID=${UID}
+#      - PGID=13000
+#      - UMASK=002
+#      - TZ=${TIMEZONE}
+#    volumes:
+#      - ${ROOT_DIR}/docker/jellyfin-config:/config
+#      - ${ROOT_DIR}/data/media:/data/media
+#    ports:
+#      - 8096:8096
+#    restart: unless-stopped
+
+#
+# SERVARR
+#
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=13002
+      - PGID=13000
+      - UMASK=002
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${ROOT_DIR}/docker/radarr-config:/config
+      - ${ROOT_DIR}/data:/data
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=13001
+      - PGID=13000
+      - UMASK=002
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${ROOT_DIR}/docker/sonarr-config:/config
+      - ${ROOT_DIR}/data:/data
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+#  lidarr:
+#    image: lscr.io/linuxserver/lidarr:latest
+#    container_name: lidarr
+#    environment:
+#      - PUID=13003
+#      - PGID=13000
+#      - UMASK=002
+#      - TZ=${TIMEZONE}
+#    volumes:
+#      - ${ROOT_DIR}/docker/lidarr-config:/config
+#      - ${ROOT_DIR}/data:/data
+#    ports:
+#      - 8686:8686
+#    restart: unless-stopped
+
+#  readarr:
+#    image: lscr.io/linuxserver/readarr:develop
+#    container_name: readarr
+#    environment:
+#      - PUID=13004
+#      - PGID=13000
+#      - UMASK=002
+#      - TZ=${TIMEZONE}
+#    volumes:
+#      - ${ROOT_DIR}/docker/readarr-config:/config
+#      - ${ROOT_DIR}/data:/data
+#    ports:
+#      - 8787:8787
+#    restart: unless-stopped
+
+#  prowlarr:
+#    image: lscr.io/linuxserver/prowlarr:develop
+#    container_name: prowlarr
+#    environment:
+#      - PUID=13006
+#      - PGID=13000
+#      - UMASK=002
+#      - TZ=${TIMEZONE}
+#    volumes:
+#      - ${ROOT_DIR}/docker/prowlarr-config:/config
+#    ports:
+#      - 9696:9696
+#    restart: unless-stopped
+
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    environment:
+      - PUID=13008
+      - PGID=13000
+      - UMASK=002
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${ROOT_DIR}/docker/jackett-config:/config
+    ports:
+      - 9117:9117
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=13007
+      - PGID=13000
+      - UMASK=002
+      - TZ=${TIMEZONE}
+      - WEBUI_PORT=8080
+    volumes:
+      - ${ROOT_DIR}/docker/qbittorrent-config:/config
+      - ${ROOT_DIR}/data/torrents:/data/torrents
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
     restart: unless-stopped
