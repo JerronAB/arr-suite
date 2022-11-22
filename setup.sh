@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/jerron/arr-suite/
+cd /home/user/arr-suite/
 # Make users and group
 sudo useradd sonarr -u 13001
 sudo useradd radarr -u 13002
