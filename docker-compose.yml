@@ -14,20 +14,20 @@ services:
       - ${ROOT_DIR}/data/media:/data/media
     restart: unless-stopped
 
-#  tautulli:
-#    image: lscr.io/linuxserver/tautulli:latest
-#    container_name: tautulli
-#    depends_on:
-#      - plex
-#    environment:
-#      - PUID=${UID}
-#      - PGID=13000
-#      - TZ=${TIMEZONE}
-#    volumes:
-#      - ${ROOT_DIR}/docker/tautulli-config:/config
-#    ports:
-#      - 8181:8181
-#    restart: unless-stopped
+  tautulli:
+    image: lscr.io/linuxserver/tautulli:latest
+    container_name: tautulli
+    depends_on:
+      - plex
+    environment:
+      - PUID=${UID}
+      - PGID=13000
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${ROOT_DIR}/docker/tautulli-config:/config
+    ports:
+      - 8181:8181
+    restart: unless-stopped
 
 #  jellyfin:
 #    image: lscr.io/linuxserver/jellyfin:latest
@@ -77,20 +77,20 @@ services:
       - 8989:8989
     restart: unless-stopped
 
-#  lidarr:
-#    image: lscr.io/linuxserver/lidarr:latest
-#    container_name: lidarr
-#    environment:
-#      - PUID=13003
-#      - PGID=13000
-#      - UMASK=002
-#      - TZ=${TIMEZONE}
-#    volumes:
-#      - ${ROOT_DIR}/docker/lidarr-config:/config
-#      - ${ROOT_DIR}/data:/data
-#    ports:
-#      - 8686:8686
-#    restart: unless-stopped
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    environment:
+      - PUID=13003
+      - PGID=13000
+      - UMASK=002
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${ROOT_DIR}/docker/lidarr-config:/config
+      - ${ROOT_DIR}/data:/data
+    ports:
+      - 8686:8686
+    restart: unless-stopped
 
 #  readarr:
 #    image: lscr.io/linuxserver/readarr:develop
@@ -152,6 +152,7 @@ services:
       - 6881:6881
       - 6881:6881/udp
     restart: unless-stopped
+
   nginx-rev-proxy:
     image: 'jc21/nginx-proxy-manager:latest'
     container_name: nginx-proxy-manager
@@ -159,3 +160,6 @@ services:
       - '80:80'
       - '81:81'
       - '443:443'
+    volumes:
+      - ${ROOT_DIR}/docker/nginx-config:/data
+      - ${ROOT_DIR}/docker/letsencrypt:/etc/letsencrypt
